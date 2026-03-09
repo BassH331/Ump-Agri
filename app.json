@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "UMP Map App",
+    "slug": "ump-map-app",
+    "sdkVersion": "54.0.0",
+    "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBUU61-ImsO6WkXw_BGV4nADBu0IktNdUs"
+        }
+      },
+      "package": "com.anonymous.umpmapapp",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "@logrocket/react-native",
+        {
+          "organization": "nfmlrd",
+          "project": "ump-map"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24,
+            "packagingOptions": {
+              "pickFirst": [
+                "**/libc++_shared.so",
+                "**/libhermes.so",
+                "**/libjsc.so"
+              ]
+            }
+          }
+        }
+      ],
+      "expo-font"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.anonymous.umpmapapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "db45731b-64c9-466c-a5f7-16cdbe311ad2"
+      }
+    }
+  }
+}

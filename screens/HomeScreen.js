@@ -23,14 +23,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { routeBetween } from '../utils/osmRouter';
 
 const CATEGORY_STYLES = {
-  Food: { color: '#FF7043', label: 'Food', icon: 'fast-food' },
-  Admin: { color: '#1E88E5', label: 'Admin', icon: 'briefcase' },
-  Education: { color: '#8E24AA', label: 'Lectures', icon: 'school' },
-  Libraries: { color: '#43A047', label: 'Library', icon: 'book' },
-  ComputerLabs: { color: '#00ACC1', label: 'Labs', icon: 'code-working' },
-  ParkingBay: { color: '#546E7A', label: 'Parking', icon: 'car' },
-  Residence: { color: '#FBC02D', label: 'Residence', icon: 'home' },
-  default: { color: theme.colors.primary, label: 'Campus', icon: 'business' },
+  AcademicBlock: { color: '#1E88E5', label: 'Academic Block', icon: 'school' },
+  Residences: { color: '#FBC02D', label: 'Residences', icon: 'home' },
+  SportsComplex: { color: '#43A047', label: 'Sports Complex', icon: 'fitness' },
+  Administration: { color: '#8E24AA', label: 'Admin Bins', icon: 'business' },
+  FoodCourts: { color: '#FF7043', label: 'Food Bins', icon: 'restaurant' },
+  Default: { color: '#999', label: 'Other Bins', icon: 'trash-bin' },
 };
 
 const FOOD_KEYWORDS_REGEX = /(cafeteria|dining\s?hall|dining|tuck\s?shop|tuckshop|restaurant|canteen|food|kitchen|coffee|snack)/i;
@@ -115,7 +113,7 @@ class KalmanFilter {
     const y = z - Hx;
 
     // Innovation covariance S = H * P * H^T + R
-    const S = this.P[0][0] * this.H[0]**2 + 2 * this.P[0][1] * this.H[0] * this.H[1] + this.P[1][1] * this.H[1]**2 + this.R;
+    const S = this.P[0][0] * this.H[0] ** 2 + 2 * this.P[0][1] * this.H[0] * this.H[1] + this.P[1][1] * this.H[1] ** 2 + this.R;
 
     // Kalman gain K = P * H^T / S
     const K0 = (this.P[0][0] * this.H[0] + this.P[1][0] * this.H[1]) / S;
@@ -242,7 +240,7 @@ export default function HomeScreen() {
     if (route.params?.startNavigation && route.params?.selectedVenue) {
       const venue = route.params.selectedVenue;
       startNavigation(venue);
-     
+
       navigation.setParams({
         startNavigation: null,
         selectedVenue: null
@@ -358,9 +356,9 @@ export default function HomeScreen() {
             const horizontalSpeedKmh = (speed && speed >= 0.5 && smoothedAccuracy <= 20 && userLocationRef.current && calculateDistance(smoothedLat, smoothedLon, userLocationRef.current.latitude, userLocationRef.current.longitude) >= jitter)
               ? Math.round(speed * 3.6)
               : Math.sqrt(
-                  (kfLat.current.getVelocity() * degToMeters / 3.6) ** 2 +
-                  (kfLon.current.getVelocity() * degToMeters * Math.cos(smoothedLat * Math.PI / 180) / 3.6) ** 2
-                );
+                (kfLat.current.getVelocity() * degToMeters / 3.6) ** 2 +
+                (kfLon.current.getVelocity() * degToMeters * Math.cos(smoothedLat * Math.PI / 180) / 3.6) ** 2
+              );
             const verticalSpeedKmh = Math.abs(kfAlt.current.getVelocity()) * 3.6; // m/s to km/h
             const currentKmh = Math.sqrt(horizontalSpeedKmh ** 2 + verticalSpeedKmh ** 2);
             setCurrentSpeed(currentKmh);
@@ -368,7 +366,7 @@ export default function HomeScreen() {
               const movementDistance = userLocationRef.current ? calculateDistance(
                 smoothedLat, smoothedLon, userLocationRef.current.latitude, userLocationRef.current.longitude
               ) : 10;
-             
+
               const jitter = Math.max((rawAccuracy || 20) * 2, 30);
               const isWalking = (speed && speed >= 1.0) || (movementDistance >= jitter);
               const hasGoodAccuracy = rawAccuracy && rawAccuracy <= 20;
@@ -422,12 +420,12 @@ export default function HomeScreen() {
         headingSubscription = await Location.watchHeadingAsync((headingData) => {
           const { trueHeading, magHeading } = headingData;
           const heading = trueHeading >= 0 ? trueHeading : magHeading;
-         
+
           setUserHeading(heading);
-         
+
           if (isHeadingUp && isNavigating) {
             setMapHeading(heading);
-           
+
             if (mapRef.current && mapRef.current.animateCamera) {
               mapRef.current.animateCamera({
                 heading: heading,
@@ -578,7 +576,7 @@ export default function HomeScreen() {
         const sumDist = (pts) => {
           let d = 0;
           for (let i = 1; i < pts.length; i++) {
-            const a = pts[i-1];
+            const a = pts[i - 1];
             const b = pts[i];
             const R = 6371000;
             const toRad = (x) => x * Math.PI / 180;
@@ -586,7 +584,7 @@ export default function HomeScreen() {
             const dLon = toRad(b.longitude - a.longitude);
             const lat1 = toRad(a.latitude);
             const lat2 = toRad(b.latitude);
-            const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+            const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
             d += 2 * R * Math.asin(Math.sqrt(h));
           }
           return Math.round(d);
@@ -620,10 +618,10 @@ export default function HomeScreen() {
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a =
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c * 1000;
     return distance;
   };
@@ -646,10 +644,10 @@ export default function HomeScreen() {
         const R = 6371e3;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-          Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
       };
       let bestIdx = 0;
@@ -742,7 +740,7 @@ export default function HomeScreen() {
   };
   const toggleMapOrientation = () => {
     setIsHeadingUp(prev => !prev);
-   
+
     if (isHeadingUp) {
       setMapHeading(0);
       if (mapRef.current && mapRef.current.animateCamera) {
@@ -839,15 +837,15 @@ export default function HomeScreen() {
             const categoryMeta = getCategoryMeta(venue);
             const isSelected = selectedVenue?.name === venue.name;
             const iconColor = categoryMeta.color;
-            const iconSize = isSelected ? 24 : 20;
-            const badgeLetter = categoryMeta.label?.[0]?.toUpperCase() || 'B';
-            const letterStyle = iconColor === '#FBC02D' ? styles.markerLetterDark : styles.markerLetter;
+            const fillLevel = Math.floor(Math.random() * 100);
+            const statusColor = fillLevel > 80 ? '#F44336' : (fillLevel > 50 ? '#FFEB3B' : '#4CAF50');
+
             return (
               <Marker
                 key={venue._id || index}
                 coordinate={{ latitude: lat, longitude: lng }}
                 title={showBuildingNames ? venue.name : undefined}
-                description={showBuildingNames ? categoryMeta.label : undefined}
+                description={showBuildingNames ? `${categoryMeta.label} - ${fillLevel}% Full` : undefined}
                 tracksViewChanges
                 anchor={{ x: 0.5, y: 0.5 }}
                 onPress={() => handleVenueSelect(venue)}
@@ -856,13 +854,13 @@ export default function HomeScreen() {
                 <View
                   style={[
                     styles.markerIconWrapper,
-                    { borderColor: iconColor },
+                    { borderColor: statusColor },
                     isSelected && styles.markerIconSelected,
                   ]}
                 >
-                  <Ionicons name={categoryMeta.icon} size={iconSize} color={iconColor} />
-                  <View style={[styles.markerLetterBadge, { backgroundColor: iconColor }]}>
-                    <Text style={letterStyle}>{badgeLetter}</Text>
+                  <Ionicons name="trash-outline" size={iconSize} color={statusColor} />
+                  <View style={[styles.markerLetterBadge, { backgroundColor: statusColor }]}>
+                    <Text style={styles.markerLetter}>{fillLevel}%</Text>
                   </View>
                 </View>
               </Marker>
@@ -916,45 +914,38 @@ export default function HomeScreen() {
         >
           <TouchableOpacity
             style={styles.categoryButton}
-            onPress={() => handleCategoryPress('Food')}
-          >
-            <Ionicons name="fast-food" size={16} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.categoryButtonText}>Food & Dining</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.categoryButton}
-            onPress={() => handleCategoryPress('Admin')}
-          >
-            <Ionicons name="business" size={16} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.categoryButtonText}>Admin Offices</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.categoryButton}
-            onPress={() => handleCategoryPress('Education')}
+            onPress={() => handleCategoryPress('AcademicBlock')}
           >
             <Ionicons name="school" size={16} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.categoryButtonText}>Lectures</Text>
+            <Text style={styles.categoryButtonText}>Academic Block</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.categoryButton}
-            onPress={() => handleCategoryPress('Libraries')}
-          >
-            <Ionicons name="book" size={16} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.categoryButtonText}>Libraries</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.categoryButton}
-            onPress={() => handleCategoryPress('ComputerLabs')}
-          >
-            <Ionicons name="code" size={16} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.categoryButtonText}>Computer Labs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.categoryButton}
-            onPress={() => handleCategoryPress('Residence')}
+            onPress={() => handleCategoryPress('Residences')}
           >
             <Ionicons name="home" size={16} color="#fff" style={{ marginRight: 8 }} />
             <Text style={styles.categoryButtonText}>Residences</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => handleCategoryPress('SportsComplex')}
+          >
+            <Ionicons name="fitness" size={16} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.categoryButtonText}>Sports Complex</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => handleCategoryPress('Administration')}
+          >
+            <Ionicons name="business" size={16} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.categoryButtonText}>Admin Bins</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => handleCategoryPress('FoodCourts')}
+          >
+            <Ionicons name="restaurant" size={16} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.categoryButtonText}>Food Courts</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>

@@ -5,11 +5,10 @@ export default function WelcomeScreen({ onGetStarted }) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome to UMP Campus Guide</Text>
-        <Text style={styles.subtitle}>Navigate campus facilities, plan routes, and discover resources with ease.</Text>
+        <Text style={styles.title}>Welcome to EcoCampus</Text>
+        <Text style={styles.subtitle}>Smart Waste Management for a Cleaner Campus</Text>
         <Text style={styles.body}>
-          Your preferences will be saved on this device so you can pick up where you left off the next time you open the
-          app.
+          Track bin levels, classify waste with AI, and earn rewards for sustainable habits.
         </Text>
       </View>
 

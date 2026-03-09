@@ -13,6 +13,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ClassificationScreen from '../screens/ClassificationScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
+import AlertsScreen from '../screens/AlertsScreen';
 import CustomMenuIcon from '../components/CustomMenuIcon';
 import {
   DrawerContentScrollView,
@@ -35,7 +38,7 @@ function SearchBar({ navigation }) {
             left: "-7%"
           }
         })
-        }]}>
+      }]}>
         <TextInput
           style={styles.searchInputCustom}
           placeholder="Search buildings..."
@@ -43,12 +46,12 @@ function SearchBar({ navigation }) {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <Ionicons 
-          name="search-outline" 
-          size={20} 
-          color="darkblue" 
-          left={20} 
-          style={{ ...Platform.select({ ios: {left: '39%'}})}}
+        <Ionicons
+          name="search-outline"
+          size={20}
+          color="darkblue"
+          left={20}
+          style={{ ...Platform.select({ ios: { left: '39%' } }) }}
         />
       </View>
     </View>
@@ -87,7 +90,7 @@ function CustomDrawerContent(props) {
         />
       </View>
       <View style={styles.headerSection}>
-        <Text style={styles.headerText}>UMP Nav App</Text>
+        <Text style={styles.headerText}>EcoCampus</Text>
       </View>
       <View style={styles.spacer} />
       <DrawerItemList {...props} />
@@ -110,36 +113,68 @@ function DrawerTabNavigator() {
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen
-        name="Home"
+        name="WasteMap"
         component={HomeScreen}
         options={{
-          title: 'Home',
+          title: 'Campus Waste Map',
           headerTitle: (props) => <SearchBar {...props} />,
           drawerIcon: ({ focused, color, size }) => (
-            <View style={styles.drawerIcons}>
-              <Image
-                source={require('../assets/home.png')}
-                style={{ width: 24, height: 24, tintColor: color }}
-                resizeMode="contain"
-              />
-            </View>
+            <Ionicons name="map-outline" size={24} color={color} />
           ),
         }}
       />
       <Drawer.Screen
-        name="Explore"
+        name="BinStatus"
         component={ExploreScreen}
         options={{
-          title: 'Explore',
+          title: 'Bin Monitoring',
           headerTitle: (props) => <SearchBar {...props} />,
           drawerIcon: ({ focused, color, size }) => (
-            <View style={styles.drawerIcons}>
-              <Image
-                source={require('../assets/compass.png')}
-                style={{ width: 24, height: 24, tintColor: color }}
-                resizeMode="contain"
-              />
-            </View>
+            <Ionicons name="trash-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Classification"
+        component={ClassificationScreen}
+        options={{
+          title: 'Smart Classification',
+          headerTitle: (props) => <SearchBar {...props} />,
+          drawerIcon: ({ focused, color, size }) => (
+            <Ionicons name="scan-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{
+          title: 'Eco Analytics',
+          headerTitle: (props) => <SearchBar {...props} />,
+          drawerIcon: ({ focused, color, size }) => (
+            <Ionicons name="stats-chart-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Alerts"
+        component={AlertsScreen}
+        options={{
+          title: 'Smart Alerts',
+          headerTitle: (props) => <SearchBar {...props} />,
+          drawerIcon: ({ focused, color, size }) => (
+            <Ionicons name="notifications-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Eco Rewards',
+          headerTitle: (props) => <SearchBar {...props} />,
+          drawerIcon: ({ focused, color, size }) => (
+            <Ionicons name="trophy-outline" size={24} color={color} />
           ),
         }}
       />
@@ -242,7 +277,7 @@ const styles = StyleSheet.create({
         width: '81%',
         left: 10,
         right: 0
-      }, 
+      },
       ios: {
         width: '70%',
         left: 10,

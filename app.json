@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "UMP Map App",
-    "slug": "ump-map-app",
+    "name": "EcoCampus",
+    "slug": "eco-campus",
     "sdkVersion": "54.0.0",
     "android": {
       "config": {

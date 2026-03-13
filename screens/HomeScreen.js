@@ -59,6 +59,16 @@ const prettifyLabel = (value) => {
     .trim();
 };
 
+// Deterministic hash → stable fill level per venue (0-100)
+const stableFill = (name) => {
+  let hash = 0;
+  const str = name || 'unknown';
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) % 101;
+};
+
 const getCategoryMeta = (venue) => {
   const category = venue?.category;
   if (category && CATEGORY_STYLES[category]) {
@@ -217,12 +227,18 @@ export default function HomeScreen() {
     );
   };
   const [fetchError, setFetchError] = useState(null);
+  const [tappedVenue, setTappedVenue] = useState(null);
   // Load venues from API
   useEffect(() => {
     const loadVenues = async () => {
       try {
         const venueData = await fetchAllCoordinates();
-        setVenues(venueData);
+        // Attach a stable fill level to each venue so it doesn't change on re-render
+        const venuesWithFill = venueData.map(v => ({
+          ...v,
+          __stableFill: stableFill(v._id || v.name || ''),
+        }));
+        setVenues(venuesWithFill);
         setFetchError(null);
       } catch (error) {
         console.error('Error loading venues:', error);
@@ -624,6 +640,7 @@ export default function HomeScreen() {
   };
   const handleVenueSelect = (venue) => {
     setShowSearchResults(false);
+    setTappedVenue(null);
     navigation.navigate('Directions', {
       destination: {
         name: venue.name,
@@ -632,6 +649,15 @@ export default function HomeScreen() {
         ...venue,
       },
     });
+  };
+  const handleMarkerTap = (venue) => {
+    if (tappedVenue && (tappedVenue._id || tappedVenue.name) === (venue._id || venue.name)) {
+      // Second tap on same venue → navigate to Directions
+      handleVenueSelect(venue);
+    } else {
+      // First tap → show info callout
+      setTappedVenue(venue);
+    }
   };
   const updateNavigationInfo = (currentLocation) => {
     if (!selectedVenue) return;
@@ -801,6 +827,7 @@ export default function HomeScreen() {
           mapType={mapViewType}
           rotateEnabled={true}
           pitchEnabled={false}
+          onPress={() => setTappedVenue(null)}
           onRegionChangeComplete={(newRegion) => {
             if (isProgrammaticRegionChange.current || (Date.now() - lastProgrammaticRegionChangeAt.current) < 200) {
               isProgrammaticRegionChange.current = false;
@@ -835,31 +862,30 @@ export default function HomeScreen() {
             }
             const categoryMeta = getCategoryMeta(venue);
             const isSelected = selectedVenue?.name === venue.name;
-            const iconColor = categoryMeta.color;
-            const fillLevel = Math.floor(Math.random() * 100);
-            const statusColor = fillLevel > 80 ? '#F44336' : (fillLevel > 50 ? '#FFEB3B' : '#4CAF50');
+            const isTapped = tappedVenue && (tappedVenue._id || tappedVenue.name) === (venue._id || venue.name);
+            const fillLevel = venue.__stableFill ?? stableFill(venue._id || venue.name || '');
+            // Color ranges: Green ≤40%, Amber 41-75%, Red 76%+
+            const statusColor = fillLevel > 75 ? '#E53935' : (fillLevel > 40 ? '#FB8C00' : '#43A047');
+            const statusBg = fillLevel > 75 ? '#FFEBEE' : (fillLevel > 40 ? '#FFF3E0' : '#E8F5E9');
 
             return (
               <Marker
                 key={venue._id || index}
                 coordinate={{ latitude: lat, longitude: lng }}
-                title={showBuildingNames ? venue.name : undefined}
-                description={showBuildingNames ? `${categoryMeta.label} - ${fillLevel}% Full` : undefined}
-                tracksViewChanges
+                tracksViewChanges={true}
                 anchor={{ x: 0.5, y: 0.5 }}
-                onPress={() => handleVenueSelect(venue)}
-                onCalloutPress={() => handleVenueSelect(venue)}
+                onPress={() => handleMarkerTap(venue)}
               >
                 <View
                   style={[
-                    styles.markerIconWrapper,
-                    { borderColor: statusColor },
-                    isSelected && styles.markerIconSelected,
+                    styles.markerCircle,
+                    { backgroundColor: statusColor },
+                    (isSelected || isTapped) && styles.markerCircleSelected,
                   ]}
                 >
-                  <Ionicons name="trash-outline" size={20} color={statusColor} />
-                  <View style={[styles.markerLetterBadge, { backgroundColor: statusColor }]}>
-                    <Text style={styles.markerLetter}>{fillLevel}%</Text>
+                  <Text style={styles.markerPercent}>{fillLevel}%</Text>
+                  <View style={[styles.markerIconBadge, { backgroundColor: statusColor }]}>
+                    <Ionicons name="trash" size={10} color="#fff" />
                   </View>
                 </View>
               </Marker>
@@ -1046,6 +1072,52 @@ export default function HomeScreen() {
           liveBadge={true}
         />
       )}
+      {/* Venue Info Callout */}
+      {tappedVenue && !isNavigating && (() => {
+        const meta = getCategoryMeta(tappedVenue);
+        const fill = tappedVenue.__stableFill ?? stableFill(tappedVenue._id || tappedVenue.name || '');
+        const fillColor = fill > 75 ? '#E53935' : (fill > 40 ? '#FB8C00' : '#43A047');
+        const dist = userLocation ? Math.round(calculateDistance(
+          userLocation.latitude, userLocation.longitude,
+          tappedVenue.latitude, tappedVenue.longitude
+        )) : null;
+        return (
+          <View style={styles.venueCallout}>
+            <View style={styles.calloutHeader}>
+              <View style={[styles.calloutIcon, { backgroundColor: meta.color + '20' }]}>
+                <Ionicons name={meta.icon || 'location'} size={22} color={meta.color} />
+              </View>
+              <View style={styles.calloutHeaderText}>
+                <Text style={styles.calloutTitle} numberOfLines={1}>{tappedVenue.name}</Text>
+                <Text style={styles.calloutCategory}>{meta.label}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setTappedVenue(null)} style={styles.calloutClose}>
+                <Ionicons name="close" size={20} color="#999" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.calloutBody}>
+              <View style={styles.calloutFillRow}>
+                <View style={styles.calloutFillBarBg}>
+                  <View style={[styles.calloutFillBar, { width: `${fill}%`, backgroundColor: fillColor }]} />
+                </View>
+                <Text style={[styles.calloutFillText, { color: fillColor }]}>{fill}% Full</Text>
+              </View>
+              {dist !== null && (
+                <Text style={styles.calloutDistance}>{dist}m away</Text>
+              )}
+            </View>
+            <TouchableOpacity
+              style={styles.calloutNavButton}
+              onPress={() => handleVenueSelect(tappedVenue)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="navigate" size={16} color="#fff" style={{ marginRight: 6 }} />
+              <Text style={styles.calloutNavText}>Get Directions</Text>
+            </TouchableOpacity>
+            <Text style={styles.calloutHint}>Or tap the marker again</Text>
+          </View>
+        );
+      })()}
       {/* Start Navigation CTA */}
       {selectedVenue && !isNavigating && (
         <TouchableOpacity
@@ -1258,44 +1330,139 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-  markerIconWrapper: {
+  markerCircle: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#fff',
-    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2.5,
+    borderColor: '#fff',
+  },
+  markerCircleSelected: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 3,
+  },
+  markerPercent: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '900',
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  markerIconBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#fff',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowRadius: 1,
   },
-  markerIconSelected: {
-    transform: [{ scale: 1.1 }],
-  },
-  markerLetterBadge: {
+  venueCallout: {
     position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    bottom: 30,
+    left: 16,
+    right: 16,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    zIndex: 999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  calloutHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  calloutIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#fff',
   },
-  markerLetter: {
+  calloutHeaderText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  calloutTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  calloutCategory: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 2,
+  },
+  calloutClose: {
+    padding: 4,
+  },
+  calloutBody: {
+    marginBottom: 12,
+  },
+  calloutFillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  calloutFillBarBg: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#eee',
+    borderRadius: 4,
+    marginRight: 12,
+    overflow: 'hidden',
+  },
+  calloutFillBar: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  calloutFillText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    width: 65,
+    textAlign: 'right',
+  },
+  calloutDistance: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
+  },
+  calloutNavButton: {
+    flexDirection: 'row',
+    backgroundColor: '#2E7D32',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calloutNavText: {
     color: '#fff',
-    fontSize: 9,
-    fontWeight: '700',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
-  markerLetterDark: {
-    color: '#1A237E',
-    fontSize: 9,
-    fontWeight: '700',
+  calloutHint: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: '#aaa',
+    marginTop: 6,
+    fontStyle: 'italic',
   },
   navigateButton: {
     position: 'absolute',

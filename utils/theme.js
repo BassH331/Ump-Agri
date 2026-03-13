@@ -1,18 +1,26 @@
 const colors = {
-  primary: '#276EF1',
-  primaryGlass: 'rgba(39,110,241,0.90)',
-  secondary: '#00A896',
-  accent: '#FF7F50',
-  background: '#F7F7F7',
+  primary: '#2E7D32',
+  primaryDark: '#1B5E20',
+  primaryLight: '#4CAF50',
+  primaryGlass: 'rgba(46,125,50,0.90)',
+  secondary: '#66BB6A',
+  accent: '#FFB300',
+  background: '#F1F8E9',
   surface: '#FFFFFF',
-  text: '#111111',
-  muted: '#666666',
-  border: '#E5E5EA',
-  danger: '#FF3B30',
-  dangerGlass: 'rgba(255,59,48,0.90)',
-  warning: '#FFCC00',
-  success: '#34C759',
-  overlay: 'rgba(0,0,0,0.6)'
+  text: '#1B2A1B',
+  muted: '#5A6B5A',
+  border: '#C8E6C9',
+  danger: '#D32F2F',
+  dangerGlass: 'rgba(211,47,47,0.90)',
+  warning: '#F9A825',
+  success: '#388E3C',
+  overlay: 'rgba(0,0,0,0.6)',
+  card: '#FFFFFF',
+  headerGradientStart: '#2E7D32',
+  headerGradientEnd: '#1B5E20',
+  binGreen: '#4CAF50',
+  binYellow: '#FFEB3B',
+  binRed: '#F44336',
 };
 
 const spacing = {
@@ -27,6 +35,7 @@ const radii = {
   sm: 8,
   md: 12,
   lg: 16,
+  xl: 24,
   pill: 9999,
 };
 

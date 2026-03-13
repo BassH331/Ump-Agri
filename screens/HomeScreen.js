@@ -67,16 +67,13 @@ const getCategoryMeta = (venue) => {
   const name = venue?.name || '';
   const c = normalizeName(category || '');
   const n = normalizeName(name);
-  if (KNOWN_RESIDENCE_NAMES.has(n)) return CATEGORY_STYLES.Residence;
-  if (c.includes('cafeteria') || n.includes('cafeteria') || FOOD_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.Food;
-  if (c.includes('administration') || n.includes('administration') || ADMIN_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.Admin;
-  if (c.includes('education') || n.includes('lecture') || LECTURE_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.Education;
-  if (c.includes('library') || n.includes('library') || LIBRARY_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.Libraries;
-  if (c.includes('laboratory') || n.includes('laboratory') || n.includes('technology') || LAB_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.ComputerLabs;
-  if (c.includes('parking') || n.includes('parking') || PARKING_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.ParkingBay;
-  if (c.includes('residence') || n.includes('residence') || RESIDENCE_KEYWORDS_REGEX.test(name) || RES_ABBREV_REGEX.test(name)) return CATEGORY_STYLES.Residence;
-  const prettyLabel = prettifyLabel(category) || CATEGORY_STYLES.default.label;
-  return { ...CATEGORY_STYLES.default, label: prettyLabel };
+  if (KNOWN_RESIDENCE_NAMES.has(n) || c.includes('residence') || n.includes('residence') || RESIDENCE_KEYWORDS_REGEX.test(name) || RES_ABBREV_REGEX.test(name)) return CATEGORY_STYLES.Residences;
+  if (c.includes('cafeteria') || n.includes('cafeteria') || FOOD_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.FoodCourts;
+  if (c.includes('administration') || n.includes('administration') || ADMIN_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.Administration;
+  if (c.includes('education') || n.includes('lecture') || LECTURE_KEYWORDS_REGEX.test(name) || c.includes('library') || n.includes('library') || LIBRARY_KEYWORDS_REGEX.test(name) || c.includes('laboratory') || n.includes('laboratory') || n.includes('technology') || LAB_KEYWORDS_REGEX.test(name)) return CATEGORY_STYLES.AcademicBlock;
+  if (c.includes('parking') || n.includes('parking') || PARKING_KEYWORDS_REGEX.test(name) || n.includes('sport') || n.includes('gym') || n.includes('fitness')) return CATEGORY_STYLES.SportsComplex;
+  const prettyLabel = prettifyLabel(category) || CATEGORY_STYLES.Default.label;
+  return { ...CATEGORY_STYLES.Default, label: prettyLabel };
 };
 
 class KalmanFilter {
@@ -762,12 +759,14 @@ export default function HomeScreen() {
     }
   };
   const handleCategoryPress = (category) => {
-    navigation.navigate(category);
     setPanelVisible(true);
     if (category === 'All') {
       setSearchResults(venues);
     } else {
-      const filteredVenues = venues.filter(venue => venue.category === category);
+      const filteredVenues = venues.filter(venue => {
+        const meta = getCategoryMeta(venue);
+        return meta.label === CATEGORY_STYLES[category]?.label;
+      });
       setSearchResults(filteredVenues);
     }
   };
@@ -858,7 +857,7 @@ export default function HomeScreen() {
                     isSelected && styles.markerIconSelected,
                   ]}
                 >
-                  <Ionicons name="trash-outline" size={iconSize} color={statusColor} />
+                  <Ionicons name="trash-outline" size={20} color={statusColor} />
                   <View style={[styles.markerLetterBadge, { backgroundColor: statusColor }]}>
                     <Text style={styles.markerLetter}>{fillLevel}%</Text>
                   </View>
@@ -1333,6 +1332,6 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#276EF1'
+    backgroundColor: '#2E7D32'
   },
 });

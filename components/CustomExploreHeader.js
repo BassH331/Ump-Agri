@@ -35,7 +35,7 @@ export default function CustomExploreHeader() {
         <Ionicons
           name="search-outline"
           size={20}
-          color="darkblue"
+          color="#2E7D32"
           left={20}
           style={{ ...Platform.select({ ios: { left: '39%' } }) }}
         />

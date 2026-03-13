@@ -41,7 +41,7 @@ function SearchBar({ navigation }) {
       }]}>
         <TextInput
           style={styles.searchInputCustom}
-          placeholder="Search buildings..."
+          placeholder="Search bins..."
           placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -49,7 +49,7 @@ function SearchBar({ navigation }) {
         <Ionicons
           name="search-outline"
           size={20}
-          color="darkblue"
+          color="#2E7D32"
           left={20}
           style={{ ...Platform.select({ ios: { left: '39%' } }) }}
         />
@@ -101,15 +101,15 @@ function CustomDrawerContent(props) {
 function DrawerTabNavigator() {
   return (
     <Drawer.Navigator
-      initialRouteName="Home"
+      initialRouteName="WasteMap"
       screenOptions={{
         headerTitleAlign: 'center',
         headerLeft: () => <CustomMenuIcon />,
         drawerStyle: styles.drawer,
         drawerLabelStyle: styles.drawerLabel,
-        drawerActiveTintColor: 'darkblue',
-        drawerInactiveTintColor: 'white',
-        drawerActiveBackgroundColor: 'white',
+        drawerActiveTintColor: '#1B5E20',
+        drawerInactiveTintColor: 'rgba(255,255,255,0.85)',
+        drawerActiveBackgroundColor: '#C8E6C9',
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen
@@ -138,10 +138,10 @@ function DrawerTabNavigator() {
         name="Classification"
         component={ClassificationScreen}
         options={{
-          title: 'Smart Classification',
+          title: 'Collection Checklist',
           headerTitle: (props) => <SearchBar {...props} />,
           drawerIcon: ({ focused, color, size }) => (
-            <Ionicons name="scan-outline" size={24} color={color} />
+            <Ionicons name="clipboard-outline" size={24} color={color} />
           ),
         }}
       />
@@ -149,10 +149,10 @@ function DrawerTabNavigator() {
         name="Analytics"
         component={AnalyticsScreen}
         options={{
-          title: 'Eco Analytics',
+          title: 'Collection Stats',
           headerTitle: (props) => <SearchBar {...props} />,
           drawerIcon: ({ focused, color, size }) => (
-            <Ionicons name="stats-chart-outline" size={24} color={color} />
+            <Ionicons name="bar-chart-outline" size={24} color={color} />
           ),
         }}
       />
@@ -160,7 +160,7 @@ function DrawerTabNavigator() {
         name="Alerts"
         component={AlertsScreen}
         options={{
-          title: 'Smart Alerts',
+          title: 'Alerts',
           headerTitle: (props) => <SearchBar {...props} />,
           drawerIcon: ({ focused, color, size }) => (
             <Ionicons name="notifications-outline" size={24} color={color} />
@@ -171,10 +171,10 @@ function DrawerTabNavigator() {
         name="Profile"
         component={ProfileScreen}
         options={{
-          title: 'Eco Rewards',
+          title: 'Shift Log',
           headerTitle: (props) => <SearchBar {...props} />,
           drawerIcon: ({ focused, color, size }) => (
-            <Ionicons name="trophy-outline" size={24} color={color} />
+            <Ionicons name="time-outline" size={24} color={color} />
           ),
         }}
       />
@@ -208,10 +208,10 @@ export default function DrawerTab() {
 
 const styles = StyleSheet.create({
   drawerContent: {
-    backgroundColor: 'darkblue',
+    backgroundColor: '#1B5E20',
   },
   drawer: {
-    backgroundColor: 'darkblue',
+    backgroundColor: '#1B5E20',
     width: 250,
   },
   drawerLabel: {

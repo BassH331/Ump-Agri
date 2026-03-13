@@ -61,7 +61,7 @@ const BinCard = ({ item }) => {
 export default function ExploreScreen() {
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient colors={['#1E88E5', '#1565C0']} style={styles.header}>
+      <LinearGradient colors={['#2E7D32', '#1B5E20']} style={styles.header}>
         <Text style={styles.headerTitle}>Bin Monitoring</Text>
         <Text style={styles.headerSubtitle}>Real-time status of campus waste bins</Text>
       </LinearGradient>
@@ -78,10 +78,10 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa' },
+  container: { flex: 1, backgroundColor: '#F1F8E9' },
   header: { padding: 25, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, marginBottom: 10 },
   headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
-  headerSubtitle: { fontSize: 14, color: '#E3F2FD', marginTop: 5 },
+  headerSubtitle: { fontSize: 14, color: '#C8E6C9', marginTop: 5 },
   listContent: { padding: 15 },
   card: {
     backgroundColor: '#fff',
